@@ -267,14 +267,6 @@ public class PluginManager {
 
     private void downloadFile(String location, File file, IOutput out) throws Exception {
         out.msg("");
-        if (useResolver && location.contains("download.sage.tv")) {
-            throw new Exception("Need to add a resolver for " + location);
-        }
-
-        if (useResolver && location.contains("sagetv.com")) {
-            throw new Exception("Need to add a resolver for " + location);
-        }
-
         out.msg("Downloading File: " + location);
         if (overwrite && file.exists()) {
             if (!file.delete()) {

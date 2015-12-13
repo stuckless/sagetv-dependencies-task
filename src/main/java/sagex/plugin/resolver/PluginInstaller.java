@@ -2,6 +2,7 @@ package sagex.plugin.resolver;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class PluginInstaller {
     public File propFile;
     public File pluginsFile;
     public File libsDir;
+    public File baseDir;
 
     private FilenameFilter jarFilter = new FilenameFilter() {
         @Override
@@ -29,16 +31,17 @@ public class PluginInstaller {
         }
     };
 
-    public PluginInstaller(IOutput out) throws Exception {
+    public PluginInstaller(IOutput out, File baseDir) throws Exception {
         this.out = out;
+        this.baseDir=baseDir;
 
         // set http follow redirects
 
-        target = newDir("target");
-        targetCache = newDir("target/cache/");
-        pluginsFile = newFile("target/cache/SageTVPlugins.xml");
-        propFile = newFile("target/cache/libs.properties");
-        libsDir = newDir("target/libs/");
+        target = newDir(baseDir, "target");
+        targetCache = newDir(baseDir, "target/cache/");
+        pluginsFile = newFile(baseDir, "target/cache/SageTVPlugins.xml");
+        propFile = newFile(baseDir, "target/cache/libs.properties");
+        libsDir = newDir(baseDir, "target/libs/");
         properties = loadProperties(propFile);
 
         // determine if we need to reload
@@ -51,34 +54,31 @@ public class PluginInstaller {
             saveProperties(properties, propFile);
         }
 
+        out.msg("Using " + pluginsFile.getAbsolutePath());
+
         SageTVPluginModelImpl model = new SageTVPluginModelImpl(pluginsFile.toURL());
         DefaultPackageResolver resolver = new DefaultPackageResolver();
         pm = new PluginManager(model, resolver);
         pm.loadPlugins();
     }
 
-    public List<Plugin.Package> extractJarPackages(String plugin, File jarDir) {
-        try {
-            if (jarDir==null) jarDir = libsDir;
-            List<Plugin.Package> packages = new ArrayList<>();
-            List<Plugin> toInstall = pm.resolvePlugin(plugin);
-            out.msg("Calculating Dependencies for " + plugin);
-            pm.dumpPlugins(toInstall, out);
-            for (Plugin p: toInstall) {
-                for (Plugin.Package pack : p.packages) {
-                    packages.add(pack);
-                }
+    public void extractJarPackages(String plugin, File jarDir) throws Exception {
+        if (jarDir==null) jarDir = libsDir;
+        List<Plugin.Package> packages = new ArrayList<>();
+        List<Plugin> toInstall = pm.resolvePlugin(plugin);
+        out.msg("Calculating Dependencies for " + plugin);
+        pm.dumpPlugins(toInstall, out);
+        for (Plugin p: toInstall) {
+            for (Plugin.Package pack : p.packages) {
+                packages.add(pack);
             }
-            for (Plugin.Package p: packages) {
-                // download the packages
-                downloadJars(p.location, jarDir);
-            }
-            out.msg("");
-            out.msg("Done");
-        } catch (Throwable t) {
-            out.msg(t, true);
         }
-        return null;
+        for (Plugin.Package p: packages) {
+            // download the packages
+            downloadJars(p.location, jarDir);
+        }
+        out.msg("");
+        out.msg("Done");
     }
 
     public void downloadJars(String url, File jarDir) throws Exception {
@@ -88,10 +88,26 @@ public class PluginInstaller {
         } else {
             // Assume a .zip and download and extract jars
             File dest = new File(targetCache, makeZipFileName(url));
-            if (!dest.exists()) {
+            if (!dest.exists() || dest.length()==0) {
                 url2file(url, dest);
-                out.msg("DOWNLOADING: " + url);
+                out.msg("DOWNLOADING: " + url + " to " + dest.getAbsolutePath());
+            } else {
+                out.msg("DOWNLOADED: " + dest.getAbsolutePath());
             }
+            // special case, it didn't fail, but nothing was download, so resolve the url, and try again
+            if (Utils.isHTML(dest)) {
+                String newURL = Utils.parseDownloadUrl(dest);
+                out.msg("Downloaded file for " + url + " was HTML will try to resolve redirect URL: " + newURL);
+                url2file(newURL, dest);
+            }
+
+            if (dest.length()==0 || Utils.isHTML(dest)) {
+                out.msg("== FILE IS HTML ==");
+                out.msg(Utils.fileToString(dest));
+                dest.delete();
+                throw new IOException("File is invalid for " + url);
+            }
+
             // extract jars to libs area
             pm.unzip(dest, jarDir, jarFilter, false, out);
         }
@@ -107,9 +123,15 @@ public class PluginInstaller {
             SageTVPluginModelImpl sageTVPluginModel = new SageTVPluginModelImpl(f.toURL());
             sageTVPluginModel.loadPlugins(pm);
         } else {
-            URL url = new URL(devPluginsXml);
-            SageTVPluginModelImpl sageTVPluginModel = new SageTVPluginModelImpl(url);
-            sageTVPluginModel.loadPlugins(pm);
+            f = new File(baseDir, devPluginsXml);
+            if (f.exists()) {
+                SageTVPluginModelImpl sageTVPluginModel = new SageTVPluginModelImpl(f.toURL());
+                sageTVPluginModel.loadPlugins(pm);
+            } else {
+                URL url = new URL(devPluginsXml);
+                SageTVPluginModelImpl sageTVPluginModel = new SageTVPluginModelImpl(url);
+                sageTVPluginModel.loadPlugins(pm);
+            }
         }
     }
 }

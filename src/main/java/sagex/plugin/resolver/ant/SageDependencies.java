@@ -12,8 +12,6 @@ import java.io.File;
  * Created by seans on 13/12/15.
  */
 public class SageDependencies extends Task {
-    private Project project;
-
     private String pluginName;
     private File jarDir = new File("target/cache/libs/");
     private String devPluginsXml;
@@ -34,11 +32,6 @@ public class SageDependencies extends Task {
     };
 
     public SageDependencies() {
-    }
-
-    @Override
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     /**
@@ -97,7 +90,8 @@ public class SageDependencies extends Task {
         }
         PluginInstaller pluginInstaller;
         try {
-            pluginInstaller = new PluginInstaller(antOuput);
+            Project project = getProject();
+            pluginInstaller = new PluginInstaller(antOuput, (project==null)?new File("."):project.getBaseDir());
             if (devPluginsXml!=null) {
                 pluginInstaller.addDevPluginsXml(devPluginsXml);
             }
@@ -105,7 +99,11 @@ public class SageDependencies extends Task {
             antOuput.msg(e, true);
             throw new BuildException("Unable to load the Plugin Manager");
         }
-        pluginInstaller.extractJarPackages(pluginName, jarDir);
+        try {
+            pluginInstaller.extractJarPackages(pluginName, jarDir);
+        } catch (Exception e) {
+            throw new BuildException("Failed to download SageTV Jars", e);
+        }
 
         if (extraJars!=null) {
             antOuput.msg("Processing extra jars");
