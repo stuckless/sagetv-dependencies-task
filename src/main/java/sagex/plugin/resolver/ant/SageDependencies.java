@@ -13,7 +13,7 @@ import java.io.File;
  */
 public class SageDependencies extends Task {
     private String pluginName;
-    private File jarDir = new File("target/cache/libs/");
+    private File jarDir = new File("build/tmp/cache/libs/");
     private String devPluginsXml;
     private String extraJars;
     private String sageJar = "https://dl.bintray.com/opensagetv/sagetv/sagetv/9.0.3.178/SageJar-9.0.3.178.zip";
@@ -35,7 +35,7 @@ public class SageDependencies extends Task {
     }
 
     /**
-     * The parent plugin name to use when resolving dependencies
+     * The parent plugin name to use when resolving dependencies.  You can specify more than 1 sepated by comma
      * @param pluginName
      */
     public void setPluginName(String pluginName) {
@@ -51,7 +51,7 @@ public class SageDependencies extends Task {
     }
 
     /**
-     * Location of extra SageTV plugins xml to use when resolving dependencies
+     * Location of extra SageTV plugins xml to use when resolving dependencies, can include more than one separated by comma
      * @param devPluginsXml
      */
     public void setDevPluginsXml(String devPluginsXml) {
@@ -93,14 +93,20 @@ public class SageDependencies extends Task {
             Project project = getProject();
             pluginInstaller = new PluginInstaller(antOuput, (project==null)?new File("."):project.getBaseDir());
             if (devPluginsXml!=null) {
-                pluginInstaller.addDevPluginsXml(devPluginsXml);
+                String xmls[] = devPluginsXml.split("\\s*,\\s*");
+                for (String xml: xmls) {
+                    pluginInstaller.addDevPluginsXml(xml);
+                }
             }
         } catch (Exception e) {
             antOuput.msg(e, true);
             throw new BuildException("Unable to load the Plugin Manager");
         }
         try {
-            pluginInstaller.extractJarPackages(pluginName, jarDir);
+            String names[] = pluginName.split("\\s*,\\s*");
+            for (String name: names) {
+                pluginInstaller.extractJarPackages(name, jarDir);
+            }
         } catch (Exception e) {
             throw new BuildException("Failed to download SageTV Jars", e);
         }

@@ -32,16 +32,19 @@ public class PluginInstaller {
     };
 
     public PluginInstaller(IOutput out, File baseDir) throws Exception {
+        this(out, baseDir, null);
+    }
+    public PluginInstaller(IOutput out, File baseDir, String tmpTargetRelativeToBase) throws Exception {
         this.out = out;
         this.baseDir=baseDir;
 
         // set http follow redirects
 
-        target = newDir(baseDir, "target");
-        targetCache = newDir(baseDir, "target/cache/");
-        pluginsFile = newFile(baseDir, "target/cache/SageTVPlugins.xml");
-        propFile = newFile(baseDir, "target/cache/libs.properties");
-        libsDir = newDir(baseDir, "target/libs/");
+        target = newDir(baseDir, (tmpTargetRelativeToBase==null)?"build/tmp/":tmpTargetRelativeToBase);
+        targetCache = newDir(target, "cache/");
+        pluginsFile = newFile(target, "cache/SageTVPlugins.xml");
+        propFile = newFile(target, "cache/libs.properties");
+        libsDir = newDir(target, "cache/libs/");
         properties = loadProperties(propFile);
 
         // determine if we need to reload

@@ -1,0 +1,22 @@
+<SageTVPlugin>
+    <Name>Sample Plugin</Name>
+    <Identifier>phoenix-sample</Identifier>
+    <Description>
+    </Description>
+
+    <Author>stuckless</Author>
+    <CreationDate>2010.06.05</CreationDate>
+    <ModificationDate>2015.08.27</ModificationDate>
+    <Version>@@VERSION@@</Version>
+
+    <!-- we'll test if telnet gets extracted -->
+    <Dependency>
+        <Plugin>telnet</Plugin>
+        <MinVersion>1.0.1</MinVersion>
+    </Dependency>
+
+    <PluginType>Standard</PluginType>
+
+    <ReleaseNotes>
+    </ReleaseNotes>
+</SageTVPlugin>
