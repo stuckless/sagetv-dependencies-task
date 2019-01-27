@@ -6,7 +6,7 @@ apply plugin: 'java'
 
 ext {
     baseName = 'sagex.plugin.resolver'
-    baseVersion = '1.4'
+    baseVersion = '1.6'
 }
 
 jar.baseName baseName

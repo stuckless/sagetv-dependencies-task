@@ -16,7 +16,7 @@ public class SageDependencies extends Task {
     private File jarDir = new File("build/tmp/cache/libs/");
     private String devPluginsXml;
     private String extraJars;
-    private String sageJar = "https://dl.bintray.com/opensagetv/sagetv/sagetv/9.0.3.178/SageJar-9.0.3.178.zip";
+    private String sageJar = "https://dl.bintray.com/opensagetv/sagetv/sagetv/9.1.10.479/SageJar-9.1.10.479.zip";
     private boolean downloadSageJar=true;
 
     private IOutput antOuput = new IOutput() {

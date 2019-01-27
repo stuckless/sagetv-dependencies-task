@@ -14,13 +14,15 @@ public class PluginInstaller {
     public PluginManager pm;
 
     public String pluginsURL = "http://download.sagetv.com/SageTVPlugins.xml";
-    public String pluginsMD5 = "http://download.sagetv.com/SageTVPlugins.md5.txt";
+    public String pluginsURLV9 = "https://raw.githubusercontent.com/OpenSageTV/sagetv-plugin-repo/master/SageTVPluginsV9.xml";
+    // public String pluginsMD5 = "http://download.sagetv.com/SageTVPlugins.md5.txt";
 
     public File target;
     public File targetCache;
     public Properties properties;
     public File propFile;
     public File pluginsFile;
+    public File pluginsFileV9;
     public File libsDir;
     public File baseDir;
 
@@ -43,26 +45,29 @@ public class PluginInstaller {
         target = newDir(baseDir, (tmpTargetRelativeToBase==null)?"build/tmp/":tmpTargetRelativeToBase);
         targetCache = newDir(target, "cache/");
         pluginsFile = newFile(target, "cache/SageTVPlugins.xml");
+        pluginsFileV9 = newFile(target, "cache/SageTVPluginsV9.xml");
         propFile = newFile(target, "cache/libs.properties");
         libsDir = newDir(target, "cache/libs/");
         properties = loadProperties(propFile);
 
         // determine if we need to reload
-        String remotemd5 = url2string(pluginsMD5);
-        String localmd5 = properties.getProperty("md5");
-        if (localmd5==null || localmd5.isEmpty() || !localmd5.equals(remotemd5)) {
-            out.msg("Downloading " + pluginsURL);
-            properties.setProperty("md5", remotemd5);
-            url2file(pluginsURL, pluginsFile);
-            saveProperties(properties, propFile);
-        }
-
+        out.msg("Downloading " + pluginsURL);
+        url2file(pluginsURL, pluginsFile);
         out.msg("Using " + pluginsFile.getAbsolutePath());
+
+        out.msg("Downloading " + pluginsURLV9);
+        url2file(pluginsURLV9, pluginsFileV9);
+        out.msg("Using " + pluginsFileV9.getAbsolutePath());
+
 
         SageTVPluginModelImpl model = new SageTVPluginModelImpl(pluginsFile.toURL());
         DefaultPackageResolver resolver = new DefaultPackageResolver();
         pm = new PluginManager(model, resolver);
         pm.loadPlugins();
+
+        // load V9
+        SageTVPluginModelImpl sageTVPluginModel = new SageTVPluginModelImpl(pluginsFileV9.toURL());
+        sageTVPluginModel.loadPlugins(pm);
     }
 
     public void extractJarPackages(String plugin, File jarDir) throws Exception {
@@ -85,6 +90,13 @@ public class PluginInstaller {
     }
 
     public void downloadJars(String url, File jarDir) throws Exception {
+        // special case for urls that require preprocessing, such as urls that are in a plugin manifest
+        // we ignore these since these are likely just referencing our local build files
+        if (url!=null && url.contains("@@")) {
+            out.msg("Skipping Local Resource: " + url);
+            return;
+        }
+
         if (url.toLowerCase().endsWith(".jar")) {
             out.msg("DOWNLOADING JAR: " + url);
             url2file(url, new File(jarDir, new File(url).getName()));

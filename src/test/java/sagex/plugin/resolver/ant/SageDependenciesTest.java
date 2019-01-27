@@ -24,7 +24,6 @@ public class SageDependenciesTest {
             }
         }
         // lastFM comes from the SageTVpluginDev.xml override for phoenix-core
-        File lastFM = new File(cacheDir, "last.fm-bindings.jar");
         SageDependencies sageDependencies = new SageDependencies();
         sageDependencies.setJarDir(cacheDir);
 
@@ -36,7 +35,7 @@ public class SageDependenciesTest {
         sageDependencies.setDevPluginsXml(SageDependencies.class.getResource("SageTVPluginsDev.xml").toExternalForm()+","+SageDependencies.class.getResource("sample-plugin.xml").toExternalForm());
         sageDependencies.setExtraJars("http://central.maven.org/maven2/com/squareup/retrofit/retrofit/1.9.0/retrofit-1.9.0.jar, http://central.maven.org/maven2/com/squareup/okhttp/okhttp/2.2.0/okhttp-2.2.0.jar");
         sageDependencies.execute();
-        for (String jar: new String[] {"last.fm-bindings.jar", "retrofit-1.9.0.jar", "okhttp-2.2.0.jar", "commons-io-2.4.jar", "telnet.jar"}) {
+        for (String jar: new String[] {"retrofit-1.9.0.jar", "okhttp-2.2.0.jar", "commons-io-2.5.jar", "telnet.jar"}) {
             File f = new File(cacheDir, jar);
             assertTrue("FILE Should Exist, but does not: " + f,f.exists());
         }
