@@ -33,7 +33,7 @@ public class SageDependenciesTest {
         // comma separated list of extra plugins
         // use override sagetvplugins dev, and a sample plugin manifest
         sageDependencies.setDevPluginsXml(SageDependencies.class.getResource("SageTVPluginsDev.xml").toExternalForm()+","+SageDependencies.class.getResource("sample-plugin.xml").toExternalForm());
-        sageDependencies.setExtraJars("http://central.maven.org/maven2/com/squareup/retrofit/retrofit/1.9.0/retrofit-1.9.0.jar, http://central.maven.org/maven2/com/squareup/okhttp/okhttp/2.2.0/okhttp-2.2.0.jar");
+        sageDependencies.setExtraJars("https://repo1.maven.org/maven2/com/squareup/retrofit/retrofit/1.9.0/retrofit-1.9.0.jar, https://repo1.maven.org/maven2/com/squareup/okhttp/okhttp/2.2.0/okhttp-2.2.0.jar");
         sageDependencies.execute();
         for (String jar: new String[] {"retrofit-1.9.0.jar", "okhttp-2.2.0.jar", "commons-io-2.5.jar", "telnet.jar"}) {
             File f = new File(cacheDir, jar);

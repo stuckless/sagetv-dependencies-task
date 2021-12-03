@@ -6,14 +6,14 @@ apply plugin: 'java'
 
 ext {
     baseName = 'sagex.plugin.resolver'
-    baseVersion = '1.6'
+    baseVersion = '1.7'
 }
 
 jar.baseName baseName
 group 'sagex'
 version baseVersion
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
