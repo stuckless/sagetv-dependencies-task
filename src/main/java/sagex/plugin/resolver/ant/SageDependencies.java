@@ -10,6 +10,7 @@ import java.io.File;
 
 /**
  * Created by seans on 13/12/15.
+ * update by jusjoken 6/12/2021 to use github
  */
 public class SageDependencies extends Task {
     private String pluginName;
