@@ -10,13 +10,14 @@ import java.io.File;
 
 /**
  * Created by seans on 13/12/15.
+ * update by jusjoken 6/12/2021 to use github
  */
 public class SageDependencies extends Task {
     private String pluginName;
     private File jarDir = new File("build/tmp/cache/libs/");
     private String devPluginsXml;
     private String extraJars;
-    private String sageJar = "https://dl.bintray.com/opensagetv/sagetv/sagetv/9.1.10.479/SageJar-9.1.10.479.zip";
+    private String sageJar = "https://github.com/OpenSageTV/sagetv-linux/releases/download/9.2.6.1/SageJar-9.2.6.1.zip";
     private boolean downloadSageJar=true;
 
     private IOutput antOuput = new IOutput() {

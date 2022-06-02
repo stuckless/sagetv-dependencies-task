@@ -1,19 +1,19 @@
 plugins {
-    id "com.jfrog.bintray" version "1.4"
+    id 'maven-publish'
 }
 
 apply plugin: 'java'
 
 ext {
     baseName = 'sagex.plugin.resolver'
-    baseVersion = '1.6'
+    baseVersion = '1.7'
 }
 
 jar.baseName baseName
 group 'sagex'
 version baseVersion
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -25,7 +25,30 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
 
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/jusjoken/sagetv-dependencies-task")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId = 'sagex'
+            artifactId = 'sagex.plugin.resolver'
+            version = '1.7'
+
+            from(components.java)
+        }
+    }
+}
+
 // uploading to BinTray
+/*
 bintray {
     user = System.getenv("BINTRAY_USER")
     key = System.getenv("BINTRAY_API");
@@ -57,3 +80,4 @@ bintray {
         }
     }
 }
+*/
